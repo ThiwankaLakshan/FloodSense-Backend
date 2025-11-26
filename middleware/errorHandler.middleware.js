@@ -1,5 +1,5 @@
 const { error } = require('winston');
-const logger = require('../config/logger');
+const logger = require('../utils/logger.util');
 
 //404 not found handler
 function notFoundHandler(req, res, next) {

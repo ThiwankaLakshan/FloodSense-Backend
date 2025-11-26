@@ -1,5 +1,7 @@
-const { query } = require('../config/database');
-const logger = require('../config/logger');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+const { query } = require('../db/db');
+const logger = require('../utils/logger.util');
 
 class RiskService {
 
@@ -7,7 +9,7 @@ class RiskService {
         try {
                 const locationResult = await query(
                 'SELECT * FROM locations WHERE id = $1',
-                [location_id]
+                [locationId]
             );
 
             if (locationResult.rows.length === 0) {

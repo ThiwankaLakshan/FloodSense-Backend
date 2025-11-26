@@ -1,8 +1,9 @@
-const axios = require('axios');
-const pool = require('../config/database');
-const logger = require('../config/logger');
-const { log } = require('winston');
 require('dotenv').config();
+const axios = require('axios');
+const db = require('../db/db');
+const logger = require('../utils/logger.util');
+const { log } = require('winston');
+
 
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
@@ -81,7 +82,7 @@ class WeatherService {
     logger.info('Starting weather data collection for all locations');
         try {
             //get all locations
-            const locationsResult = await pool.query('SELECT id, latitude, longitude, name FROM locations');
+            const locationsResult = await  db.query('SELECT id, latitude, longitude, name FROM locations');
             const locations = locationsResult.rows;
 
             logger.info(`Fetching weather for ${locations.length} locations...`);
@@ -133,7 +134,7 @@ class WeatherService {
         ];
 
         try {
-            const result = await pool.query(query, values);
+            const result = await  db.query(query, values);
             logger.debug(`Weather data saved to database, ID: ${result.rows[0].id}`);
             return result.rows[0].id;
         } catch (error) {

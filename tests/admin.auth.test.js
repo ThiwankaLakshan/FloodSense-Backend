@@ -1,3 +1,4 @@
+require('dotenv').config();
 const axios = require('axios');
 
 const API_URL = 'http://localhost:5000';

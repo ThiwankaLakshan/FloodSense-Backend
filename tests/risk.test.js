@@ -1,5 +1,5 @@
-const riskCalculator = require('./services/riskCalculator');
-const RiskCalculator = require('./services/riskCalculator');
+const riskCalculator = require('../services/riskCalculator');
+const RiskCalculator = require('../services/riskCalculator');
 
 async function testRiskCalculator() {
     try {

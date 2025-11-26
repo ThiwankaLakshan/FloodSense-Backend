@@ -1,5 +1,7 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const riskRules = require('../config/riskRules');
-const pool = require('../config/database');
+const db = require('../db/db');
 const { level } = require('winston');
 
 class RiskCalculator {
@@ -8,7 +10,7 @@ class RiskCalculator {
     async calculateRisk(locationId) {
         try {
             //get location details
-            const locationResult = await pool.query(
+            const locationResult = await  db.query(
                 'SELECT * FROM locations WHERE id = $1',
                 [locationId]
             );
@@ -20,7 +22,7 @@ class RiskCalculator {
             const location = locationResult.rows[0];
 
             //get latest weather data
-            const weatherResult = await pool.query(
+            const weatherResult = await  db.query(
                 `SELECT * FROM weather_data
                 WHERE location_id = $1
                 ORDER BY timestamp DESC
@@ -35,7 +37,7 @@ class RiskCalculator {
             const weather = weatherResult.rows[0];
 
             //get historical floods for this location
-            const floodResult = await pool.query(
+            const floodResult = await  db.query(
                 `SELECT * FROM historical_floods
                 WHERE location_id = $1
                 AND flood_date >= CURRENT_DATE - INTERVAL '5 years'`,
@@ -58,9 +60,9 @@ class RiskCalculator {
         }
     }
 
-    //conpute risk based on all factors
+    //compute risk based on all factors
 
-    computeRiskScore(locaction, weather, historicalFloods) {
+    computeRiskScore(location, weather, historicalFloods) {
         let totalScore = 0;
         const factors = [];
 
@@ -85,7 +87,7 @@ class RiskCalculator {
         }
 
         //factor 3: elevation
-        const elevationScore = this.scoreElevation(locaction.elevation);
+        const elevationScore = this.scoreElevation(location.elevation);
         if (elevationScore.score > 0) {
             totalScore += elevationScore.score;
             factors.push({ ...elevationScore, factor: 'elevation'});
@@ -214,19 +216,19 @@ class RiskCalculator {
             weather.rainfall_72h
         ];
 
-        const result = await pool.query(query, values);
+        const result = await  db.query(query, values);
         return result.rows[0].id;
     }
 
     //calculate risk for all locations
     async calculateRiskForAllLocations() {
         try {
-            const locationsResult = await pool.query('SELECT id FROM locations');
+            const locationsResult = await  db.query('SELECT id FROM locations');
             const locations = locationsResult.rows;
 
             console.log(`Calculating risk for ${locations.length} locations`);
 
-            for (const locaction of locations) {
+            for (const location of locations) {
                 try {
                     const risk = await this.calculateRisk(location.id);
                     if (risk) {

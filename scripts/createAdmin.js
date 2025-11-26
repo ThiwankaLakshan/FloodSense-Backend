@@ -1,15 +1,8 @@
 const bcrypt = require('bcrypt');
-const { Pool } = require('../config/database');
+const { pool } = require('../config/database');
 const e = require('express');
 require('dotenv').config();
 
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'flood_alert_db',
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 5432,
-});
 
 async function createAdmin() {
     try {
@@ -20,7 +13,7 @@ async function createAdmin() {
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        const existingAdmin = await pool.query(
+        const existingAdmin = await  db.query(
             `SELECT * FROM admin_users WHERE username = $1`,
             [username]
         );
@@ -35,7 +28,7 @@ async function createAdmin() {
             process.exit(1);
         }
 
-        await pool.query(
+        await  db.query(
             `INSERT INTO admin_users (username, password_hash, email) VALUES ($1, $2, $3) RETURNING id, username, email, created_at`,
             [username, passwordHash, email]
         );

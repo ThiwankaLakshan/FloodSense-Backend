@@ -1,11 +1,19 @@
 const express = require('express');
 const cors = require('cors');
-const scheduler = require('./services/scheduler');
+const scheduler = require('./services/scheduler.service');
 const { timeStamp, error } = require('console');
-const adminRoutes = require('./routes/admin');
-const logger = require('./config/logger');
-const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
-require('dotenv').config();
+
+const logger = require('./utils/logger.util');
+const { notFoundHandler, errorHandler } = require('./middleware/errorHandler.middleware');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
+
+const adminRoutes = require('./routes/admin.route');
+const locationsRoutes = require('./routes/location.route');
+const weatherRoutes = require('./routes/weather.route');
+const riskRoutes = require('./routes/riskAssessment.route');
+const dashboardRoutes = require('./routes/dashboard.route');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,16 +28,14 @@ app.use((req, res, next) => {
   next();
 });
 
-const locationsRoutes = require('./routes/locations');
-const weatherRoutes = require('./routes/weather');
-const riskRoutes = require('./routes/risk');
-const dashboardRoutes = require('./routes/dashboard');
+
+app.use('/api/admin', adminRoutes);
 
 app.use('/api/locations', locationsRoutes);
 app.use('/api/locations',weatherRoutes);
 app.use('/api/locations',riskRoutes);
 app.use('/api/dashboard',dashboardRoutes);
-app.use('/api/admin', adminRoutes);
+
 
 // Test route
 app.get('/', (req, res) => {

@@ -1,7 +1,8 @@
+require('dotenv').config();
 const cron = require('node-cron');
-const weatherService = require('./weatherService');
-const riskCalculator = require('./riskCalculator');
-const pool = require('../config/database');
+const weatherService = require('./weather.service');
+const riskCalculator = require('./riskCalculator.service');
+const db = require('../db/db');
 
 class Scheduler {
   start() {
@@ -42,12 +43,12 @@ class Scheduler {
     
     try {
       // Get all locations
-      const locationsResult = await pool.query('SELECT id FROM locations');
+      const locationsResult = await  db.query('SELECT id FROM locations');
       const locations = locationsResult.rows;
       
       for (const location of locations) {
         // Calculate 24h rainfall
-        const rainfall24h = await pool.query(`
+        const rainfall24h = await  db.query(`
           SELECT COALESCE(SUM(rainfall_1h), 0) as total
           FROM weather_data
           WHERE location_id = $1
@@ -55,7 +56,7 @@ class Scheduler {
         `, [location.id]);
         
         // Calculate 72h rainfall
-        const rainfall72h = await pool.query(`
+        const rainfall72h = await  db.query(`
           SELECT COALESCE(SUM(rainfall_1h), 0) as total
           FROM weather_data
           WHERE location_id = $1
@@ -63,7 +64,7 @@ class Scheduler {
         `, [location.id]);
         
         // Update latest weather record
-        await pool.query(`
+        await  db.query(`
           UPDATE weather_data
           SET rainfall_24h = $1, rainfall_72h = $2
           WHERE location_id = $3
@@ -101,7 +102,7 @@ class Scheduler {
     ];
     
     try {
-      await pool.query(query, values);
+      await  db.query(query, values);
     } catch (err) {
       console.error('Failed to log error:', err);
     }
