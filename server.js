@@ -14,6 +14,8 @@ const locationsRoutes = require('./routes/location.route');
 const weatherRoutes = require('./routes/weather.route');
 const riskRoutes = require('./routes/riskAssessment.route');
 const dashboardRoutes = require('./routes/dashboard.route');
+const subscriptionRoutes = require('./routes/subscription.route');
+const alertRoutes = require('./routes/alert.route');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -33,8 +35,10 @@ app.use('/api/admin', adminRoutes);
 
 app.use('/api/locations', locationsRoutes);
 app.use('/api/locations',weatherRoutes);
-app.use('/api/locations',riskRoutes);
+app.use('/api/risk',riskRoutes);
 app.use('/api/dashboard',dashboardRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/alerts',alertRoutes);
 
 
 // Test route

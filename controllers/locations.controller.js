@@ -211,6 +211,23 @@ const getDistricts = async (req, res) => {
     }
 };
 
+const getHistoricalFloods = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const floods = await Location.getHistoricalFloods(id);
+
+        return res.status(200).json({
+            count: floods.length,
+            data: floods
+        });
+    } catch (error) {
+        console.error('Error fetching historical floods:', error);
+        return res.status(500).json({
+            error: 'Failed to fetch historical floods'
+        });
+    }
+};
+
 module.exports = {
     getAllLocations,
     getLocationById,
@@ -221,5 +238,6 @@ module.exports = {
     deleteLocation,
     getWeatherHistory,
     getRiskHistory,
+    getHistoricalFloods,
     getDistricts
 };

@@ -123,9 +123,9 @@ const createRiskAssessment = async (req, res) => {
             rainfall_72h
         } = req.body;
 
-        if (!location_id || !risk_level || risk_score === undefined) {
+        if (risk_score < 0 || risk_score > 15) {
             return res.status(400).json({
-                error: 'location_id, risk_level, and risk_score are required'
+                error: 'risk_score must be between 0 and 15'
             });
         }
 

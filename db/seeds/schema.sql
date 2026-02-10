@@ -85,6 +85,8 @@ CREATE TABLE alert_subscriptions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_subscriptions_location ON alert_subscriptions(location_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_active ON alert_subscriptions(is_active);
 
 -- historical floods table 
 CREATE TABLE historical_floods (

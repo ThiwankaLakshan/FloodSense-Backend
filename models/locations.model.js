@@ -192,6 +192,17 @@ class Location {
         return result.rows;
     }
 
+    // Get historical floods for location
+    static async getHistoricalFloods(locationId) {
+        const result = await db.query(
+            `SELECT * FROM historical_floods
+             WHERE location_id = $1
+             ORDER BY flood_date DESC`,
+            [locationId]
+        );
+        return result.rows;
+    }
+
     // Count locations
     static async count() {
         const result = await db.query('SELECT COUNT(*) as total FROM locations');

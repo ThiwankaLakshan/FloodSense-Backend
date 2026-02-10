@@ -9,6 +9,7 @@ router.get('/districts', locationController.getDistricts);
 router.get('/:id', locationController.getLocationById);
 router.get('/:id/weather-history', locationController.getWeatherHistory);
 router.get('/:id/risk-history', locationController.getRiskHistory);
+router.get('/:id/historical-floods', locationController.getHistoricalFloods);
 router.get('/district/:district', locationController.getLocationsByDistrict);
 router.get('/risk/:riskLevel', locationController.getLocationsByRisk);
 
