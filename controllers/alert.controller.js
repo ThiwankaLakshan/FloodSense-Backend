@@ -1,5 +1,7 @@
 const Alert = require('../models/alert.model');
 const logger = require('../utils/logger.util');
+const { triggerEmailAlert } = require('../services/alert.service');
+const Subscription = require('../models/subscription.model');
 
 const getAllAlerts = async (req, res) => {
     try {
@@ -134,7 +136,8 @@ const createAlert = async (req, res) => {
             alert_type,
             recipient,
             message,
-            status
+            status,
+            risk_level
         } = req.body;
 
         // Validation
@@ -164,6 +167,48 @@ const createAlert = async (req, res) => {
             message,
             status: status || 'active'
         });
+
+        if (alert_type === 'EMAIL') {
+            try {
+                // Get full alert details for email template
+                const fullAlert = await Alert.findById(alert.id);
+                
+                await triggerEmailAlert(recipient, {
+                    location: fullAlert.location_name,
+                    riskLevel: fullAlert.risk_level,
+                    rainfall24h: fullAlert.rainfall_24h || 0
+                });
+                
+                await Alert.updateStatus(alert.id, 'sent');
+            } catch (emailError) {
+                logger.error('Failed to send email alert:', emailError);
+                await Alert.updateStatus(alert.id, 'failed');
+            }
+        } else if (recipient === 'PUBLIC' || alert_type === 'FLOOD') {
+            // Broadcast to subscribers
+            try {
+                const subscribers = await Subscription.findActiveByLocationAndRisk(location_id, risk_level || 'HIGH');
+                
+                if (subscribers.length > 0) {
+                     const fullAlert = await Alert.findById(alert.id);
+                     
+                     // Send emails in parallel (consider batching for large numbers)
+                     const emailPromises = subscribers
+                        .filter(sub => sub.email)
+                        .map(sub => triggerEmailAlert(sub.email, {
+                            location: fullAlert.location_name,
+                            riskLevel: risk_level || fullAlert.risk_level,
+                            rainfall24h: fullAlert.rainfall_24h || 0
+                        }).catch(err => logger.error(`Failed to send email to ${sub.email}:`, err)));
+
+                     await Promise.all(emailPromises);
+                     logger.info(`Broadcasted alert to ${emailPromises.length} subscribers`);
+                }
+            } catch (broadcastError) {
+                logger.error('Failed to broadcast alert:', broadcastError);
+                // Don't fail the request, just log it
+            }
+        }
 
         logger.info(`Alert created: ${alert.id} for location ${location_id}`);
 

@@ -46,10 +46,10 @@ class Subscription {
     static async findActiveByLocationAndRisk(locationId, riskLevel) {
         // Risk level hierarchy: LOW < MODERATE < HIGH < CRITICAL
         const riskHierarchy = {
-            'LOW': ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'],
-            'MODERATE': ['MODERATE', 'HIGH', 'CRITICAL'],
-            'HIGH': ['HIGH', 'CRITICAL'],
-            'CRITICAL': ['CRITICAL']
+            'LOW': ['LOW'],
+            'MODERATE': ['LOW', 'MODERATE'],
+            'HIGH': ['LOW', 'MODERATE', 'HIGH'],
+            'CRITICAL': ['LOW', 'MODERATE', 'HIGH', 'CRITICAL']
         };
 
         const allowedLevels = riskHierarchy[riskLevel] || [];

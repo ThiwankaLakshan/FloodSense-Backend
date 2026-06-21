@@ -59,7 +59,8 @@ class Alert {
                 l.name as location_name,
                 l.district,
                 ra.risk_level,
-                ra.risk_score
+                ra.risk_score,
+                ra.rainfall_24h
             FROM alerts a
             LEFT JOIN locations l ON a.location_id = l.id
             LEFT JOIN risk_assessments ra ON a.risk_assessment_id = ra.id
