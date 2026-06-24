@@ -100,39 +100,42 @@ class RiskService {
         }
     }
 
-    
-    calculateRiskScore({ rainfall24h, rainfall72h, elevation, historicalFloodCount }) {
-    // No meaningful rainfall = LOW, period
-    if (rainfall24h < 10 && rainfall72h < 20) return 0;
+    // NEW: Calculate score on 0-12 scale matching riskRules.js
+    calculateRiskScore({ rainfall24h, rainfall72h, elevation, historicalFloodCount, currentRainfall }) {
+        let score = 0;
 
-    let score = 0;
+        // Rainfall 24h factor (0-4 points)
+        if (rainfall24h >= 200) score += 4;
+        else if (rainfall24h >= 150) score += 3;
+        else if (rainfall24h >= 100) score += 2;
+        else if (rainfall24h >= 50) score += 1;
 
-    if (rainfall24h >= 200) score += 4;
-    else if (rainfall24h >= 150) score += 3;
-    else if (rainfall24h >= 100) score += 2;
-    else if (rainfall24h >= 50) score += 1;
+        // Rainfall 72h factor (0-4 points)
+        if (rainfall72h >= 400) score += 4;
+        else if (rainfall72h >= 300) score += 3;
+        else if (rainfall72h >= 200) score += 2;
+        else if (rainfall72h >= 100) score += 1;
 
-    if (rainfall72h >= 400) score += 4;
-    else if (rainfall72h >= 300) score += 3;
-    else if (rainfall72h >= 200) score += 2;
-    else if (rainfall72h >= 100) score += 1;
+        // Elevation factor (0-3 points)
+        if (elevation < 5) score += 3;
+        else if (elevation < 10) score += 2;
+        else if (elevation < 25) score += 1;
 
-    if (elevation < 5) score += 3;
-    else if (elevation < 10) score += 2;
-    else if (elevation < 25) score += 1;
+        // Historical flood factor (0-2 points)
+        if (historicalFloodCount >= 3) score += 2;
+        else if (historicalFloodCount >= 1) score += 1;
 
-    if (historicalFloodCount >= 3) score += 2;
-    else if (historicalFloodCount >= 1) score += 1;
+        // Season factor (0-2 points)
+        const currentMonth = new Date().getMonth() + 1; // 1-12
+        const monsoonMonths = [5, 6, 7, 8, 9, 10, 11, 12, 1]; // SW + NE monsoons
+        const interMonsoonMonths = [3, 4];
 
-    const currentMonth = new Date().getMonth() + 1;
-    const monsoonMonths = [5, 6, 7, 8, 9, 10, 11, 12, 1];
-    const interMonsoonMonths = [3, 4];
+        if (monsoonMonths.includes(currentMonth)) score += 2;
+        else if (interMonsoonMonths.includes(currentMonth)) score += 1;
 
-    if (monsoonMonths.includes(currentMonth)) score += 2;
-    else if (interMonsoonMonths.includes(currentMonth)) score += 1;
-
-    return Math.min(score, 15);
-}
+        // Cap at reasonable maximum
+        return Math.min(score, 15);
+    }
 
     // NEW: Use riskRules.js to determine level
     getRiskLevelFromRules(score) {
