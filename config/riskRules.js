@@ -39,7 +39,7 @@ module.exports = {
     // Maximum possible score: 4 + 4 + 3 + 2 + 2 = 15
     riskLevels: [
     {
-        minScore: 11,
+        minScore: 12,
         level: 'CRITICAL',
         color: '#DC2626',
         action: 'Evacuate immediately to higher ground'
@@ -51,7 +51,7 @@ module.exports = {
         action: 'Prepare to evacuate - secure property and gather emergency supplies'
     },
     {
-        minScore: 4,
+        minScore: 5,
         level: 'MODERATE',
         color: '#EAB308',
         action: 'Stay alert - monitor updates and review evacuation plan'

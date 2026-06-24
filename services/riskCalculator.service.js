@@ -63,62 +63,76 @@ class RiskCalculator {
     //compute risk based on all factors
 
     computeRiskScore(location, weather, historicalFloods) {
-        let totalScore = 0;
-        const factors = [];
+    let totalScore = 0;
+    const factors = [];
 
-        //factor 1: 24h rainfall
-        const rainfall24hScore = this.scoreRainfall(
-            weather.rainfall_24h,
-            riskRules.rainfall.rainfall24h
-        );
-        if (rainfall24hScore.score > 0) {
-            totalScore += rainfall24hScore.score;
-            factors.push({ ...rainfall24hScore, factor: 'rainfall_24h' });
-        }
+    const rainfall24h = parseFloat(weather.rainfall_24h) || 0;
+    const rainfall72h = parseFloat(weather.rainfall_72h) || 0;
 
-        //factor 2: 72h rainfall
-        const rainfall72hScore = this.scoreRainfall(
-            weather.rainfall_72h,
-            riskRules.rainfall.rainfall72h
-        );
-        if (rainfall72hScore.score > 0) {
-            totalScore += rainfall72hScore.score;
-            factors.push({ ...rainfall72hScore,factor: 'rainfall_72h'});
-        }
-
-        //factor 3: elevation
-        const elevationScore = this.scoreElevation(location.elevation);
-        if (elevationScore.score > 0) {
-            totalScore += elevationScore.score;
-            factors.push({ ...elevationScore, factor: 'elevation'});
-        }
-
-        //factor 4: season
-        const seasonScore = this.scoreSeason();
-        if (seasonScore.score > 0){
-            totalScore += seasonScore.score;
-            factors.push({ ...seasonScore, factor: 'season'});
-        }
-
-        //factor 5: historical floods
-        const historicalScore = this.scoreHistoricalFloods(historicalFloods);
-        if (historicalScore.score > 0){
-            totalScore += historicalScore.score;
-            factors.push({ ...historicalScore, factor: 'historical'});
-        }
-
-        //determine risk level
-        const riskLevel = this.getRiskLevel(totalScore);
-
+    // If there's no meaningful rainfall, return LOW immediately
+    if (rainfall24h < 10 && rainfall72h < 20) {
         return {
-            riskScore: totalScore,
-            riskLevel: riskLevel.level,
-            riskColor: riskLevel.color,
-            recommendedAction: riskLevel.action,
-            factors: factors,
+            riskScore: 0,
+            riskLevel: 'LOW',
+            riskColor: '#22C55E',
+            recommendedAction: 'Normal conditions - maintain general awareness',
+            factors: [],
             timestamp: new Date()
         };
     }
+
+    // Factor 1: 24h rainfall
+    const rainfall24hScore = this.scoreRainfall(
+        weather.rainfall_24h,
+        riskRules.rainfall.rainfall24h
+    );
+    if (rainfall24hScore.score > 0) {
+        totalScore += rainfall24hScore.score;
+        factors.push({ ...rainfall24hScore, factor: 'rainfall_24h' });
+    }
+
+    // Factor 2: 72h rainfall
+    const rainfall72hScore = this.scoreRainfall(
+        weather.rainfall_72h,
+        riskRules.rainfall.rainfall72h
+    );
+    if (rainfall72hScore.score > 0) {
+        totalScore += rainfall72hScore.score;
+        factors.push({ ...rainfall72hScore, factor: 'rainfall_72h' });
+    }
+
+    // Factor 3: elevation (only counts when rainfall is present)
+    const elevationScore = this.scoreElevation(location.elevation);
+    if (elevationScore.score > 0) {
+        totalScore += elevationScore.score;
+        factors.push({ ...elevationScore, factor: 'elevation' });
+    }
+
+    // Factor 4: season
+    const seasonScore = this.scoreSeason();
+    if (seasonScore.score > 0) {
+        totalScore += seasonScore.score;
+        factors.push({ ...seasonScore, factor: 'season' });
+    }
+
+    // Factor 5: historical floods (only counts when rainfall is present)
+    const historicalScore = this.scoreHistoricalFloods(historicalFloods);
+    if (historicalScore.score > 0) {
+        totalScore += historicalScore.score;
+        factors.push({ ...historicalScore, factor: 'historical' });
+    }
+
+    const riskLevel = this.getRiskLevel(totalScore);
+
+    return {
+        riskScore: totalScore,
+        riskLevel: riskLevel.level,
+        riskColor: riskLevel.color,
+        recommendedAction: riskLevel.action,
+        factors,
+        timestamp: new Date()
+    };
+}
 
     //Score rainfall amount
 
