@@ -1,11 +1,11 @@
-const { createAlert } = require('./controllers/alert.controller');
-const Alert = require('./models/alert.model');
-const { triggerEmailAlert } = require('./services/alert.service');
+const { createAlert } = require('../controllers/alert.controller');
+const Alert = require('../models/alert.model');
+const { triggerEmailAlert } = require('../services/alert.service');
 
 // Mock dependencies
-jest.mock('./models/alert.model');
-jest.mock('./services/alert.service');
-jest.mock('./utils/logger.util', () => ({
+jest.mock('../models/alert.model');
+jest.mock('../services/alert.service');
+jest.mock('../utils/logger.util', () => ({
     info: jest.fn(),
     error: jest.fn()
 }));

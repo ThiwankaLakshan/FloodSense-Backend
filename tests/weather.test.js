@@ -1,5 +1,5 @@
 require('dotenv').config();
-const weatherService = require('../services/weatherService');
+const weatherService = require('../services/weather.service');
 
 async function testWeather() {
     try {

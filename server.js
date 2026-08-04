@@ -35,6 +35,7 @@ app.use('/api/admin', adminRoutes);
 
 app.use('/api/locations', locationsRoutes);
 app.use('/api/locations',weatherRoutes);
+app.use('/api/weather', weatherRoutes);
 app.use('/api/risk',riskRoutes);
 app.use('/api/dashboard',dashboardRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);

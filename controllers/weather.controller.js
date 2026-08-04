@@ -169,7 +169,18 @@ const compareLocations = async (req, res) => {
 
 const createWeatherData = async (req, res) => {
     try {
-        const weatherData = req.body;
+        const body = req.body;
+        const weatherData = {
+            location_id: body.location_id || body.location || body.locationId,
+            temperature: body.temperature,
+            humidity: body.humidity,
+            rainfall_1h: body.rainfall_1h !== undefined ? body.rainfall_1h : (body.rainfall !== undefined ? body.rainfall : 0),
+            rainfall_24h: body.rainfall_24h !== undefined ? body.rainfall_24h : 0,
+            wind_speed: body.wind_speed !== undefined ? body.wind_speed : (body.windSpeed !== undefined ? body.windSpeed : 0),
+            weather_condition: body.weather_condition || body.weatherCondition || 'Clear',
+            pressure: body.pressure !== undefined ? body.pressure : 1013,
+            cloud_cover: body.cloud_cover !== undefined ? body.cloud_cover : 0
+        };
 
         if (!weatherData.location_id) {
             return res.status(400).json({
@@ -201,7 +212,19 @@ const bulkCreateWeatherData = async (req, res) => {
             });
         }
 
-        const created = await Weather.bulkCreate(weatherData);
+        const normalizedData = weatherData.map(body => ({
+            location_id: body.location_id || body.location || body.locationId,
+            temperature: body.temperature,
+            humidity: body.humidity,
+            rainfall_1h: body.rainfall_1h !== undefined ? body.rainfall_1h : (body.rainfall !== undefined ? body.rainfall : 0),
+            rainfall_24h: body.rainfall_24h !== undefined ? body.rainfall_24h : 0,
+            wind_speed: body.wind_speed !== undefined ? body.wind_speed : (body.windSpeed !== undefined ? body.windSpeed : 0),
+            weather_condition: body.weather_condition || body.weatherCondition || 'Clear',
+            pressure: body.pressure !== undefined ? body.pressure : 1013,
+            cloud_cover: body.cloud_cover !== undefined ? body.cloud_cover : 0
+        }));
+
+        const created = await Weather.bulkCreate(normalizedData);
 
         return res.status(201).json({
             message: 'Weather data created successfully',
